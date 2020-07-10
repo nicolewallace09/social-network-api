@@ -1,4 +1,4 @@
-const { Schema, model, Types } = require('mongoose');
+const { Schema, model } = require('mongoose');
 const moment = require('moment');
 
 const UserSchema = new Schema({
@@ -26,12 +26,13 @@ const UserSchema = new Schema({
     },
 {
     toJSON: {
-        getters: true
-    }
+        virtuals: true
+    },
+    id: false
 });
 
 // virtual to count friends
-CommentSchema.virtual('friendCount').get(function() {
+UserSchema.virtual('friendCount').get(function() {
     return this.friends.length;
 });
 

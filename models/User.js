@@ -13,6 +13,7 @@ const UserSchema = new Schema({
         unique: true, 
         required: true,
         // match a valid email address
+        match: [/.+\@.+\..+/]
     },
         // subdocument for thoughts 
         thoughts: [
@@ -22,7 +23,13 @@ const UserSchema = new Schema({
             ref: 'Thought'
         }
         ],
-        friends: [UserSchema]
+        friends: [
+        {
+            type: Schema.Types.ObjectId,
+            // referring to the user document model 
+            ref: 'User'
+        }
+        ]
     },
 {
     toJSON: {

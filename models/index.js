@@ -1,6 +1,5 @@
 // package up all the models
-
 const User = require('./User');
-const Comment = require('./Comment');
+const Thought = require('./Thought');
 
-module.exports = { User, Comment }
+module.exports = { User, Thought }

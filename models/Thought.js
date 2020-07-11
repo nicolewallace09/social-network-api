@@ -1,62 +1,67 @@
-const { Schema, model } = require('mongoose');
+// Importing Dependencies 
+const { Schema, model, Types } = require('mongoose');
 const moment = require('moment');
 
-const PizzaSchema = new Schema({
-    pizzaName: {
-        type: String,
-        // can change the message to a custom message
-        required: true,
-        // works like JavaScript's trim to remove extra white space
-        trim: true
+// Reaction is a subdocument of Thought
+const ReactionSchema = new Schema({ 
+    reactionId: {
+        type: Schema.Types.ObjectId,
+        // default value is set to a new ObjectId
+        default: () => new Types.ObjectId()
     },
-    createdBy: {
+    reactionBody: {
         type: String,
         required: true,
-        trim: true
+        maxlength: 280
+    },
+    username: {
+        type: String,
+        required: true
+    }, 
+    createdAt: {
+        type: Date, 
+        default: Date.now,
+        get: (createdAtVal) => moment(createdAtVal).format('MMM DD, YYYY [at] hh:mm a')
+    },
+},
+{
+    toJSON: {
+        getters: true
+    }
+});
+
+const ThoughtSchema = new Schema({
+    thoughtText: {
+        type: String,
+        required: true,
+        maxlength: 280,
+        minlength: 1
     },
     createdAt: {
         type: Date, 
         default: Date.now,
-        // setting getter to format data on the page
         get: (createdAtVal) => moment(createdAtVal).format('MMM DD, YYYY [at] hh:mm a')
     },
-    size: {
+    username: {
         type: String,
         required: true,
-        // enumerable, a popular term in web development that refers to a set of data that can be iterated over (user cannot input any data note in that array)
-        enum: ['Personal', 'Small', 'Medium', 'Large', 'Extra Large'],
-        default: 'Large'
-    }, 
-    // [] array as datatype -- you can also specify arrays 
-    toppings: [],
-    // subdocument 
-    comments: [
-        {
-            type: Schema.Types.ObjectId,
-            // referring to the comment document model 
-            ref: 'Comment'
-        }
-    ]
+    },
+    reactions: [ReactionSchema]
 },
 {
     toJSON: {
         virtuals: true,
         getters: true
     },
-    // id is not needed for virtuals 
     id: false   
 }
 ); 
 
-// get total count of comments and replies on retrieval 
-// reduce takes two parameters - accumulator(total) and currentValue(comment)
-PizzaSchema.virtual('commentCount').get(function() {
-    return this.comments.reduce((total, comment) => total + comment.replies.length + 1, 0);
-  });
+ThoughtSchema.virtual('reactionCount').get(function() {
+    return this.reactions.length;
+});
 
-// create the Pizza model using the PizzaSchema
-const Pizza = model('Pizza', PizzaSchema);
+const Thought = model('Thought', ThoughtSchema);
 
-// export the Pizza model
-module.exports = Pizza;
+module.exports = Thought;
 
